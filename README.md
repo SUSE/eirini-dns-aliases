@@ -1,1 +1,1 @@
-# eirinix-dns-aliases
+# eirini-dns-aliases

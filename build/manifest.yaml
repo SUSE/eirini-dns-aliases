@@ -1,0 +1,12 @@
+# This file controls the arguments shared by the build steps.
+
+binary:
+  output:
+    directory: output
+    name: eirini-dns-aliases
+
+image:
+  output:
+    base: opensuse/leap:15.1
+    repository: cfcontainerization/eirini-dns-aliases
+    tag: master

@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "eirini-dns-aliases.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "eirini-dns-aliases.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "eirini-dns-aliases.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "eirini-dns-aliases.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.image.pull_secrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "eirini-dns-aliases.fullname" . }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ default .Values.image.tag .Chart.AppVersion }}"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: https
+          containerPort: {{ .Values.deployment.port }}
+          protocol: TCP
+        env:
+        - name: EIRINI_NAMESPACE
+          value: {{ required "Missing deployment.eirini_namespace" .Values.deployment.eirini_namespace | quote }}
+        - name: WEBHOOK_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: PORT
+          value: {{ .Values.deployment.port | quote }}
+        - name: SERVICE_NAME
+          value: {{ include "eirini-dns-aliases.fullname" . }}
+        - name: OPERATOR_FINGERPRINT
+          value: "{{ .Release.Name }}-eirini-dns-aliases"
+        - name: DNS_SERVICE_HOST
+          value: {{ required "Missing dnsServiceHost" .Values.dnsServiceHost | quote }}
+        # livenessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: https
+        # readinessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: https

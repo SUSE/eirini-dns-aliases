@@ -1,0 +1,6 @@
+apiVersion: v2
+name: eirini-dns-aliases
+description: A Helm chart for eirini-dns-aliases
+type: application
+version: master
+appVersion: master

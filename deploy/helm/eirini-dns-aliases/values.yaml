@@ -1,0 +1,8 @@
+dnsServiceHost: ~
+image:
+  pull_secrets: ~
+  repository: cfcontainerization/eirini-dns-aliases
+  tag: ~
+deployment:
+  port: 443
+  eirini_namespace: ~
