@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/SUSE/eirini-dns-aliases/pkg/extension"
-	eirinix "github.com/SUSE/eirinix"
+	eirinix "code.cloudfoundry.org/eirinix"
 )
 
 func main() {

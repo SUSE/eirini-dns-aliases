@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	eirinix "github.com/SUSE/eirinix"
+	eirinix "code.cloudfoundry.org/eirinix"
 	"github.com/docker/libnetwork/resolvconf"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -39,7 +39,7 @@ func (ext *Extension) Handle(
 	strOptions := resolvconf.GetOptions(rc.Content)
 	options := make([]corev1.PodDNSConfigOption, 0, len(strOptions))
 	for _, strOption := range strOptions {
-		split := strings.Split(strOption, ":")
+		split := strings.SplitN(strOption, ":", 2)
 		option := corev1.PodDNSConfigOption{
 			Name:  split[0],
 			Value: &split[1],
