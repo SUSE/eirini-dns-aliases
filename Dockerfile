@@ -12,7 +12,7 @@ COPY go.mod go.sum ./
 RUN if test "${GO111MODULE}" != off ; then go mod download ; fi
 COPY . ./
 RUN echo "Building eirini-dns-aliases ${version}"
-RUN go build -ldflags="-s -w" -o output/eirini-dns-aliases
+RUN go build -ldflags="-s -w -X main.appVersion=${version}" -o output/eirini-dns-aliases
 
 FROM "${base}"
 

@@ -11,6 +11,7 @@ cmd = [
   'build',
   '--build-arg', "build_base=#{manifest.image.builder}",
   '--build-arg', "base=#{manifest.image.base}",
+  '--build-arg', "version=#{manifest.image.tag}",
   '--tag', "#{manifest.image.repository}:#{manifest.image.tag}",
   git_root
 ]

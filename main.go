@@ -12,6 +12,8 @@ import (
 	"github.com/SUSE/eirini-dns-aliases/pkg/extension"
 )
 
+var appVersion string = ""
+
 func main() {
 	z, err := zap.NewProduction()
 	if err != nil {
@@ -19,6 +21,8 @@ func main() {
 	}
 	defer z.Sync()
 	zaplog := z.Sugar()
+
+	zaplog.Infow("Starting eirini-dns-aliases", "version", appVersion)
 	eiriniNsEnvVar := os.Getenv("EIRINI_NAMESPACE")
 	if eiriniNsEnvVar == "" {
 		zaplog.Fatal("the EIRINI_NAMESPACE environment variable must be set")
