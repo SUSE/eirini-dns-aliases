@@ -15,6 +15,7 @@ require (
 	github.com/prometheus/client_golang v1.3.0 // indirect
 	github.com/prometheus/common v0.9.1 // indirect
 	github.com/vishvananda/netlink v1.1.0 // indirect
+	go.uber.org/zap v1.15.0
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
