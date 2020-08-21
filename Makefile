@@ -3,5 +3,5 @@
 binary:
 	ruby build/binary.rb
 
-image: binary
+image:
 	ruby build/image.rb

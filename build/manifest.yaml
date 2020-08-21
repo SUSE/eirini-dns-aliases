@@ -6,7 +6,7 @@ binary:
     name: eirini-dns-aliases
 
 image:
-  output:
-    base: opensuse/leap:15.1
-    repository: cfcontainerization/eirini-dns-aliases
-    tag: master
+  builder: golang:1
+  base: opensuse/leap:15.2
+  repository: cfcontainerization/eirini-dns-aliases
+  tag: master
