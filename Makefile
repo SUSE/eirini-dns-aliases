@@ -5,3 +5,6 @@ binary:
 
 image:
 	ruby build/image.rb
+
+chart:
+	ruby build/chart.rb

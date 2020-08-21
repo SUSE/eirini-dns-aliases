@@ -7,7 +7,7 @@ metadata:
   labels:
     {{- include "eirini-dns-aliases.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.deployment.replicaCount }}
   selector:
     matchLabels:
       {{- include "eirini-dns-aliases.selectorLabels" . | nindent 6 }}
@@ -23,9 +23,11 @@ spec:
       serviceAccountName: {{ include "eirini-dns-aliases.fullname" . }}
       containers:
       - name: {{ .Chart.Name }}
+        {{- with .Values.securityContext }}
         securityContext:
-          {{- toYaml .Values.securityContext | nindent 12 }}
-        image: "{{ .Values.image.repository }}:{{ default .Values.image.tag .Chart.AppVersion }}"
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
         imagePullPolicy: IfNotPresent
         ports:
         - name: https
@@ -33,7 +35,7 @@ spec:
           protocol: TCP
         env:
         - name: EIRINI_NAMESPACE
-          value: {{ required "Missing deployment.eirini_namespace" .Values.deployment.eirini_namespace | quote }}
+          value: {{ include "eirini-dns-aliases.deployment-namespace" . | quote }}
         - name: WEBHOOK_NAMESPACE
           valueFrom:
             fieldRef:
@@ -46,11 +48,6 @@ spec:
           value: "{{ .Release.Name }}-eirini-dns-aliases"
         - name: DNS_SERVICE_HOST
           value: {{ required "Missing dnsServiceHost" .Values.dnsServiceHost | quote }}
-        # livenessProbe:
-        #   httpGet:
-        #     path: /
-        #     port: https
-        # readinessProbe:
-        #   httpGet:
-        #     path: /
-        #     port: https
+        # eirinix does not currently expose enough things to add liveness / readiness probes to
+        # the pod; while the controller manager has some support for it, that requires additional
+        # fields to be pass through, such as an additional port (!?) for the probe server.

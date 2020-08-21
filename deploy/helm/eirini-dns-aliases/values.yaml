@@ -1,8 +1,9 @@
-dnsServiceHost: ~
+dnsServiceHost: bosh-dns
 image:
   pull_secrets: ~
   repository: cfcontainerization/eirini-dns-aliases
   tag: ~
 deployment:
+  replicaCount: 1
   port: 443
   eirini_namespace: ~

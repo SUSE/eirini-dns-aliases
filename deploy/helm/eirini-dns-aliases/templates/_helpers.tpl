@@ -32,13 +32,20 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
+Filter a string to an approximation that is acceptable for Kubernetes labels.
+*/}}
+{{- define "eirini-dns-aliases.filter-for-label" -}}
+{{- . | replace "+" "_" -}}
+{{- end -}}
+
+{{/*
 Common labels
 */}}
 {{- define "eirini-dns-aliases.labels" -}}
 helm.sh/chart: {{ include "eirini-dns-aliases.chart" . }}
 {{ include "eirini-dns-aliases.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | include "eirini-dns-aliases.filter-for-label" | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
@@ -60,4 +67,11 @@ Create the name of the service account to use
 {{- else -}}
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
+{{- end -}}
+
+{{/*
+The Eirini deployment namespace
+*/}}
+{{- define "eirini-dns-aliases.deployment-namespace" -}}
+{{ required "Missing deployment.eirini_namespace" .Values.deployment.eirini_namespace }}
 {{- end -}}
