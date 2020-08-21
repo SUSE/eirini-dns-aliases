@@ -2,7 +2,9 @@
 name: Publish Release
 on:
   workflow_dispatch: {}
-  push: {}
+  push:
+    branches: [ master ]
+    tags-ignore: [ "*-dev+[0-9]+-g*" ]
 jobs:
   gather-info:
     name: Gather Release Information
