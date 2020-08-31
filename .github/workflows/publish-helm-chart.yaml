@@ -1,23 +1,23 @@
 ---
-name: Publish Release
+name: Build Docker Image
 on:
   workflow_dispatch: {}
   push:
     branches: [ master ]
-    tags-ignore: [ "*-dev+[0-9]+-g*" ]
 jobs:
   gather-info:
     name: Gather Release Information
     runs-on: ubuntu-latest
     outputs:
       github-ref: ${{ steps.github-ref.outputs.github-ref }}
+      git-tag:    ${{ steps.git-tag.outputs.git-tag }}
       docker-tag: ${{ steps.docker-tag.outputs.docker-tag }}
-      git-tag: ${{ steps.git-tag.outputs.git-tag }}
     steps:
     - name: Checkout
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
+        submodules: recursive
     - id: github-ref
       name: Determine GitHub Ref
       env:
@@ -42,23 +42,7 @@ jobs:
       name: Determine Git Tag
       run: |
         set -o errexit -o nounset -o pipefail
-        # Describe output should skip tags created by other describe output
-        TAG="$(git describe --tags --abbrev=0 --exclude '*-*-g*' --first-parent)"
-        DESCRIBE="$(git describe --tags --long --exclude '*-*-g*' --first-parent)"
-        case "${DESCRIBE}" in
-          "${TAG}-0-g"*)
-            # We are on the tag
-            OUTPUT="${TAG}";;
-          "${TAG}-"*)
-            # We are not on the tag; add -dev pre-release version
-            INFO="${DESCRIBE#${TAG}-}"
-            OUTPUT="${TAG}-dev+${INFO}";;
-          *)
-            echo "Unexpected output:" >&2
-            echo "TAG: ${TAG}" >&2
-            echo "DESCRIBE: ${DESCRIBE}" >&2
-            exit 1;;
-        esac
+        OUTPUT="$(ruby build/kubecf-tools/versioning/versioning.rb)"
         echo "Using git tag ${OUTPUT}"
         echo "::set-output name=git-tag::${OUTPUT}"
     - id: docker-tag
@@ -69,59 +53,7 @@ jobs:
         echo "::set-output name=docker-tag::${DOCKER_TAG}"
       env:
         GIT_TAG: ${{ steps.git-tag.outputs.git-tag }}
-  build-chart:
-    name: Build Helm Chart
-    runs-on: ubuntu-latest
-    needs: gather-info
-    outputs:
-      chart_url: ${{ steps.upload-chart.outputs.browser_download_url }}
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Build Helm Chart
-      run: make chart
-      env:
-        DOCKER_REPOSITORY: ${{ secrets.DOCKER_REPOSITORY }}/eirini-dns-aliases
-        DOCKER_TAG: ${{ needs.gather-info.outputs.docker-tag }}
-        HELM_APP_VERSION: ${{ needs.gather-info.outputs.git-tag }}
-        HELM_VERSION: ${{ needs.gather-info.outputs.git-tag }}
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: eirini-dns-aliases-${{ needs.gather-info.outputs.git-tag }}.tgz
-        path: output/eirini-dns-aliases-${{ needs.gather-info.outputs.git-tag }}.tgz
-  create-release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    needs: [gather-info, build-chart]
-    outputs:
-      id: ${{ steps.create-release.outputs.id }}
-      chart-url: ${{ steps.upload-chart.outputs.browser_download_url }}
-    steps:
-    - id: create-release
-      name: Create Release
-      uses: actions/create-release@v1
-      with:
-        tag_name: ${{ needs.gather-info.outputs.git-tag }}
-        release_name: ${{ needs.gather-info.outputs.git-tag }}
-        prerelease: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Download Helm Chart Artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: eirini-dns-aliases-${{ needs.gather-info.outputs.git-tag }}.tgz
-    - id: upload-chart
-      name: Upload Helm Chart
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: eirini-dns-aliases-${{ needs.gather-info.outputs.git-tag }}.tgz
-        asset_name: eirini-dns-aliases-${{ needs.gather-info.outputs.git-tag }}.tgz
-        asset_content_type: application/x-compressed-tar
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  docker-images:
+  docker-image:
     name: Publish Docker Image
     runs-on: ubuntu-latest
     needs: gather-info
@@ -141,34 +73,3 @@ jobs:
         always_pull: true
         add_git_labels: true
         build_args: version=${{ needs.gather-info.outputs.git-tag }}
-  publish-chart:
-    name: Publish Helm Chart
-    runs-on: ubuntu-latest
-    needs: [gather-info, create-release]
-    defaults:
-      run:
-        working-directory: eirini-dns-aliases
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        path: eirini-dns-aliases
-    - name: Check Out Helm Repository
-      uses: actions/checkout@v2
-      with:
-        ref: gh-pages
-        path: gh-pages
-    - name: Update Helm Index
-      run: >
-        ruby
-        "${GITHUB_WORKSPACE}/eirini-dns-aliases/.github/workflows/update-helm-index.rb"
-      env:
-        REPO: ${{ github.repository }}
-        GITHUB_REF: ${{ needs.gather-info.outputs.git-tag }}
-        CHART_URL: ${{ needs.create-release.outputs.chart-url }}
-        GIT_AUTHOR_NAME: ${{ github.actor }}
-        GIT_AUTHOR_EMAIL: ${{ github.actor }}@noreply.users.github.com
-      working-directory: gh-pages
-    - name: Push Helm Index
-      run: git push 
-      working-directory: gh-pages

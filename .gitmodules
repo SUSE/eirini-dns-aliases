@@ -1,0 +1,3 @@
+[submodule "build/kubecf-tools"]
+	path = build/kubecf-tools
+	url = https://github.com/cloudfoundry-incubator/kubecf-tools.git
