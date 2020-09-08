@@ -7,6 +7,6 @@ binary:
 
 image:
   builder: golang:1
-  base: opensuse/leap:15.2
+  base: scratch
   repository: cfcontainerization/eirini-dns-aliases
   tag: master
