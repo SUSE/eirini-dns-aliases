@@ -1,7 +1,9 @@
 .PHONY: binary image
 
 image:
-	ruby build/image.rb
+	ruby build/kubecf-tools/build-scripts/build-docker-image.rb \
+		--prefix=image build/manifest.yaml
 
 binary:
-	ruby build/binary.rb
+	ruby build/kubecf-tools/build-scripts/build-go-binary.rb \
+		--prefix=binary build/manifest.yaml
