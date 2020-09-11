@@ -1,0 +1,16 @@
+# This file controls the arguments shared by the build steps.
+
+binary:
+  build:
+    cgo: false
+    version-variable: main.appVersion
+  output:
+    directory: output
+
+image:
+  args:
+    build_base: golang:1
+    base: scratch
+  repository: cfcontainerization/eirini-dns-aliases
+  tag: master
+  type: go
