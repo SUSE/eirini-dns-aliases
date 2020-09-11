@@ -63,9 +63,10 @@ jobs:
     - name: Publish Docker Image
       uses: docker/build-push-action@v1
       with:
-        repository: ${{ secrets.DOCKER_REPOSITORY }}/eirini-dns-aliases
-        username:   ${{ secrets.DOCKER_USERNAME }}
-        password:   ${{ secrets.DOCKER_PASSWORD }}
+        registry: ghcr.io
+        repository: ${{ secrets.GHCR_REPOSITORY }}/eirini-dns-aliases
+        username:   ${{ secrets.GHCR_USERNAME }}
+        password:   ${{ secrets.GHCR_PASSWORD }}
         tags: ${{ needs.gather-info.outputs.docker-tag }},${{ github.sha }}
         labels: >-
           org.opencontainers.image.ref.name=${{ needs.gather-info.outputs.github-ref }},
