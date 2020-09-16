@@ -12,9 +12,7 @@ import (
 	"github.com/SUSE/eirini-dns-aliases/pkg/extension"
 )
 
-const (
-	operatorFingerprint = "eirini-dns-aliases"
-)
+const operatorFingerprint = "eirini-dns-aliases"
 var appVersion string = ""
 
 func main() {
