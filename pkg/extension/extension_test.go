@@ -71,8 +71,8 @@ var _ = Describe("Eirini extension", func() {
 				searches := resolvconf.GetSearchDomains(rc.Content)
 				searches = append(searches, "service.cf.internal")
 
-				patches := jsonifyPatches(extension.Handle(context.TODO(), eiriniManager, pod, request))
-				Expect(patches).To(ContainElement(noDnsPolicyPatch))
+				patches := jsonifyPatches(extension.Handle(context.Background(), eiriniManager, pod, request))
+				Expect(patches).To(ContainElement(MatchJSON(noDnsPolicyPatch)))
 
 				settings := struct {
 					Nameservers []string `json:"nameservers"`
@@ -92,7 +92,7 @@ var _ = Describe("Eirini extension", func() {
 				}
 				dataPatch, err := json.Marshal(patch)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(patches).To(ContainElement(string(dataPatch)))
+				Expect(patches).To(ContainElement(MatchJSON(dataPatch)))
 				Expect(len(patches)).To(Equal(2))
 			})
 		})

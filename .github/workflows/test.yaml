@@ -1,17 +1,27 @@
 on: [push, pull_request]
-name: Build and Test
+name: Test
 jobs:
   test:
     strategy:
       matrix:
         go-version: [1.14.x]
-        platform: [ubuntu-latest]
-    runs-on: ${{ matrix.platform }}
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Install Go
       uses: actions/setup-go@v2
       with:
         go-version: ${{ matrix.go-version }}
+    - name: Get go information
+      id: go-info
+      run: |
+        printf "::set-output name=GOPATH::%s\n" "$(go env GOPATH)"
+        printf "::set-output name=GO_VERSION::%s\n" "$(go version | awk '{ print $3 }')"
+        printf "::set-output name=GO_PLATFORM::%s\n" "$(go version | awk '{ print $4 }')"
+    - uses: actions/cache@v2
+      with:
+        path: ${{ steps.go-info.outputs.GOPATH }}/pkg/mod/cache
+        key: go-mod-cache-${{ steps.go-info.outputs.GO_VERSION}}-${{ steps.go-info.outputs.GO_PLATFORM }}
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Dependencies
