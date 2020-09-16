@@ -12,6 +12,7 @@ import (
 	"github.com/SUSE/eirini-dns-aliases/pkg/extension"
 )
 
+const operatorFingerprint = "eirini-dns-aliases"
 var appVersion string = ""
 
 func main() {
@@ -47,11 +48,6 @@ func main() {
 		zaplog.Fatal("the SERVICE_NAME environment variable must be set")
 	}
 
-	operatorFingerprintEnvVar := os.Getenv("OPERATOR_FINGERPRINT")
-	if operatorFingerprintEnvVar == "" {
-		zaplog.Fatal("the OPERATOR_FINGERPRINT environment variable must be set")
-	}
-
 	dnsServiceHostEnvVar := os.Getenv("DNS_SERVICE_HOST")
 	if dnsServiceHostEnvVar == "" {
 		zaplog.Fatal("the DNS_SERVICE_HOST environment variable must be set")
@@ -65,7 +61,7 @@ func main() {
 		Port:                int32(port),
 		Logger:              zaplog,
 		FilterEiriniApps:    &filter,
-		OperatorFingerprint: operatorFingerprintEnvVar,
+		OperatorFingerprint: operatorFingerprint,
 		ServiceName:         serviceNameEnvVar,
 		WebhookNamespace:    webhookNsEnvVar,
 	})
