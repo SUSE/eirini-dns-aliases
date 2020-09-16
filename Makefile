@@ -7,3 +7,6 @@ image:
 binary:
 	ruby build/kubecf-tools/build-scripts/build-go-binary.rb \
 		--prefix=binary build/manifest.yaml
+
+test-unit:
+	ginkgo -r -v --randomizeAllSpecs -failOnPending --trace

@@ -70,7 +70,7 @@ func main() {
 		WebhookNamespace:    webhookNsEnvVar,
 	})
 
-	ext.AddExtension(&extension.Extension{DNSServiceHost: dnsServiceHostEnvVar})
+	ext.AddExtension(extension.NewExtension(dnsServiceHostEnvVar, ""))
 
 	if err := ext.Start(); err != nil {
 		zaplog.Fatalw("error starting eirinix manager", "error", err)
