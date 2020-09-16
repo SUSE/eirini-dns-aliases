@@ -6,7 +6,7 @@ go 1.13
 // https://github.com/moby/moby/blob/v19.03.12/vendor.conf#L41
 
 require (
-	code.cloudfoundry.org/eirinix v0.0.0-20200813115927-6a0925613552
+	code.cloudfoundry.org/eirinix v0.3.1-0.20200908072226-2c03042398ea
 	github.com/docker/docker v1.13.1 // indirect
 	github.com/docker/libnetwork v0.0.0-20200617084541-026aabaa6598
 	github.com/golang/groupcache v0.0.0-20191227052852-215e87163ea7 // indirect
