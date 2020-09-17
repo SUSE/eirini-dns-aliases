@@ -39,7 +39,6 @@ func (ext *Extension) Handle(
 	}
 
 	podCopy := pod.DeepCopy()
-
 	podCopy.Spec.DNSPolicy = corev1.DNSNone
 
 	rc, err := resolvconf.Get()
@@ -58,12 +57,14 @@ func (ext *Extension) Handle(
 		options = append(options, option)
 	}
 
-	searches := resolvconf.GetSearchDomains(rc.Content)
-	searches = append(searches, ext.SearchDomain)
-
 	nameservers, err := net.LookupHost(ext.DNSServiceHost)
 	if err != nil {
 		return admission.Errored(http.StatusInternalServerError, err)
+	}
+
+	searches := []string{}
+	if pod.Spec.DNSConfig != nil {
+		searches = pod.Spec.DNSConfig.Searches
 	}
 
 	podCopy.Spec.DNSConfig = &corev1.PodDNSConfig{
