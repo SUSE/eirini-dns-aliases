@@ -13,19 +13,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-func NewExtension(nameserver, searchdomain string) *Extension {
-	if len(searchdomain) == 0 {
-		searchdomain = "service.cf.internal"
-	}
+func NewExtension(nameserver string) *Extension {
 	if len(nameserver) == 0 {
 		nameserver = "1.1.1.1"
 	}
-	return &Extension{DNSServiceHost: nameserver, SearchDomain: searchdomain}
+	return &Extension{DNSServiceHost: nameserver}
 }
 
 type Extension struct {
 	DNSServiceHost string
-	SearchDomain   string
 }
 
 func (ext *Extension) Handle(
@@ -59,8 +55,6 @@ func (ext *Extension) Handle(
 	}
 
 	searches := resolvconf.GetSearchDomains(rc.Content)
-	searches = append(searches, ext.SearchDomain)
-
 	nameservers, err := net.LookupHost(ext.DNSServiceHost)
 	if err != nil {
 		return admission.Errored(http.StatusInternalServerError, err)

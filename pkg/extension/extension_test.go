@@ -34,13 +34,13 @@ const (
 
 var _ = Describe("Eirini extension", func() {
 	eirinixcat := eirinixcatalog.NewCatalog()
-	extension := NewExtension("", "")
+	extension := NewExtension("")
 	eiriniManager := eirinixcat.SimpleManager()
 	request := admission.Request{}
 	pod := &corev1.Pod{}
 
 	JustBeforeEach(func() {
-		extension = NewExtension("", "")
+		extension = NewExtension("")
 		eirinixcat = eirinixcatalog.NewCatalog()
 		eiriniManager = eirinixcat.SimpleManager()
 
@@ -69,8 +69,6 @@ var _ = Describe("Eirini extension", func() {
 				Expect(err).ToNot(HaveOccurred())
 
 				searches := resolvconf.GetSearchDomains(rc.Content)
-				searches = append(searches, "service.cf.internal")
-
 				patches := jsonifyPatches(extension.Handle(context.Background(), eiriniManager, pod, request))
 				Expect(patches).To(ContainElement(MatchJSON(noDnsPolicyPatch)))
 
