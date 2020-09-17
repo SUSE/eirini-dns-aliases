@@ -13,19 +13,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-func NewExtension(nameserver, searchdomain string) *Extension {
-	if len(searchdomain) == 0 {
-		searchdomain = "service.cf.internal"
-	}
+func NewExtension(nameserver string) *Extension {
 	if len(nameserver) == 0 {
 		nameserver = "1.1.1.1"
 	}
-	return &Extension{DNSServiceHost: nameserver, SearchDomain: searchdomain}
+	return &Extension{DNSServiceHost: nameserver}
 }
 
 type Extension struct {
 	DNSServiceHost string
-	SearchDomain   string
 }
 
 func (ext *Extension) Handle(
@@ -39,6 +35,7 @@ func (ext *Extension) Handle(
 	}
 
 	podCopy := pod.DeepCopy()
+
 	podCopy.Spec.DNSPolicy = corev1.DNSNone
 
 	rc, err := resolvconf.Get()
@@ -57,14 +54,10 @@ func (ext *Extension) Handle(
 		options = append(options, option)
 	}
 
+	searches := resolvconf.GetSearchDomains(rc.Content)
 	nameservers, err := net.LookupHost(ext.DNSServiceHost)
 	if err != nil {
 		return admission.Errored(http.StatusInternalServerError, err)
-	}
-
-	searches := []string{}
-	if pod.Spec.DNSConfig != nil {
-		searches = pod.Spec.DNSConfig.Searches
 	}
 
 	podCopy.Spec.DNSConfig = &corev1.PodDNSConfig{

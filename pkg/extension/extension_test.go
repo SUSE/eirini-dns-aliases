@@ -7,6 +7,7 @@ import (
 
 	eirinixcatalog "code.cloudfoundry.org/eirinix/testing"
 	. "github.com/SUSE/eirini-dns-aliases/pkg/extension"
+	"github.com/docker/libnetwork/resolvconf"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
@@ -33,13 +34,13 @@ const (
 
 var _ = Describe("Eirini extension", func() {
 	eirinixcat := eirinixcatalog.NewCatalog()
-	extension := NewExtension("", "")
+	extension := NewExtension("")
 	eiriniManager := eirinixcat.SimpleManager()
 	request := admission.Request{}
 	pod := &corev1.Pod{}
 
 	JustBeforeEach(func() {
-		extension = NewExtension("", "")
+		extension = NewExtension("")
 		eirinixcat = eirinixcatalog.NewCatalog()
 		eiriniManager = eirinixcat.SimpleManager()
 
@@ -64,13 +65,19 @@ var _ = Describe("Eirini extension", func() {
 			})
 
 			It("Does patch the dns policy", func() {
+				rc, err := resolvconf.Get()
+				Expect(err).ToNot(HaveOccurred())
+
+				searches := resolvconf.GetSearchDomains(rc.Content)
 				patches := jsonifyPatches(extension.Handle(context.Background(), eiriniManager, pod, request))
 				Expect(patches).To(ContainElement(MatchJSON(noDnsPolicyPatch)))
 
 				settings := struct {
 					Nameservers []string `json:"nameservers"`
+					Searches    []string `json:"searches"`
 				}{
 					Nameservers: []string{"1.1.1.1"},
+					Searches:    searches,
 				}
 				patch := struct {
 					Op    string      `json:"op"`
